@@ -14,8 +14,6 @@ maintainer('Eyal Dechter', 'eyaldechter@gmail.com').
 
 packager('Eyal Dechter', 'eyaldechter@gmail.com').
 
-url('https://github.com/edechter/with_state').
-
 download('https://github.com/edechter/with_state.git').
 
 
