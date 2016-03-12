@@ -11,6 +11,7 @@
 :- use_module(library(plunit)).
 :- use_module(library(record)).
 
+:- initialization run_tests, halt.
 
 :- begin_tests(with_state).
 
