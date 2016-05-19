@@ -7,6 +7,7 @@
                        state//2,  %% //2: ?StateIn, ?StateOut
                        
                        run_state/3, %% +StateIn, -StateOut, +Goal
+                       with_state//1, %% +Goal
 
                        gets//2,  %% +Constructor, +FieldValues 
                        puts//2, %% +Constructor, +FieldValues 
@@ -46,6 +47,9 @@ state(S), [S] --> [S].
 state(S0, S), [S] --> [S0].
 
 
+
+:- discontiguous expand/2.
+
           %%%%%%%%%%%%%%%%%%%%%%%%%%
           %% Dummy predicate defs %%          
           %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,7 +74,27 @@ state(S0, S), [S] --> [S0].
 %                   )
 % ==
 run_state(_, _, _) :-
-        throw(error(existence_error(procedure, run_state/3), context(run_state/3, should_be_goal_expanded))).
+    throw(error(existence_error(procedure, run_state/3), context(run_state/3, should_be_goal_expanded))).
+
+%!    with_state(+Constructor: atom, :Goal)//
+%
+% Call =Goal= to modify state. Goal must have type =| State --> State
+% |= . Equivalent to
+%
+% ==
+%  state(State0, State),
+%  { call(Goal, State0, State) }
+% ==
+%
+% NB: with_state is subject to goal expansion.
+%
+with_state(_, _, _) :-
+    throw(error(existence_error(procedure, with_state/3), context(with_state/3, should_be_goal_expanded))).
+
+expand(with_state(Goal, [StateIn|X], [StateOut|X]), call(Goal, StateIn, StateOut)).
+
+
+
 
 
 %!    gets(+Constructor:atom, +FieldValues:list(field(value)))// is det

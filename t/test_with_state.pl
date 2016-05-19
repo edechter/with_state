@@ -11,7 +11,7 @@
 :- use_module(library(plunit)).
 :- use_module(library(record)).
 
-:- initialization run_tests, halt.
+:- initialization run_tests.
 
 :- begin_tests(with_state).
 
@@ -50,7 +50,18 @@ test('modify multiple times', [true(A-B == 3-some(thing))]):-
 test('throws error if field does not exist', throws(error(existence_error(_, _), _))) :-
         default_my_state(State0),
         run_state(State0, _State,
-                   gets(my_state, [a(_), c(_)])).
+                  gets(my_state, [a(_), c(_)])).
+
+double_a(my_state(X, Y), my_state(X1, Y)) :-    
+    X1 is 2 * X.
+
+go -->
+    with_state(double_a),
+    put(my_state, b, 3).
+
+test('call goal with_state', [State == my_state(2, 3)]) :-
+    default_my_state(State0),
+    phrase(go, [State0], [State]).
 
 
 
