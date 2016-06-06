@@ -79,6 +79,7 @@ run_state(_, _, _) :-
     throw(error(existence_error(procedure, run_state/3), context(run_state/3, should_be_goal_expanded))).
 
 
+
 %!    mod_state(+Constructor: atom, :Goal)//
 %
 % Call =Goal= to modify state. Goal must have type =| State --> State
@@ -91,13 +92,19 @@ run_state(_, _, _) :-
 %
 % NB: mod_state is subject to goal expansion.
 %
+ 
 mod_state(_, _, _) :-
     throw(error(existence_error(procedure, 'mod_state/3'), context('mod_state/3', should_be_goal_expanded))).
 
 
 expand(mod_state(Goal, In, Out), (In-Out=[StateIn|X]-[StateOut|X], Goal1)):-
 
-    strip_module(Goal, Mod, Plain),
+    ( Goal = Mod:Plain
+     -> true
+     ;
+     prolog_load_context(module, Mod),
+     Plain = Goal
+    ),
     (atom(Plain) ->
          Args = [],
          Name = Plain

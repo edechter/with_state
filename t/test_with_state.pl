@@ -13,6 +13,11 @@
 
 :- initialization run_tests.
 
+
+double_a(my_state(X, Y), my_state(X1, Y)) :-    
+    X1 is 2 * X.
+
+
 :- begin_tests(with_state).
 
 :- record my_state(a:integer=1, b).
@@ -52,11 +57,9 @@ test('throws error if field does not exist', throws(error(existence_error(_, _),
         run_state(State0, _State,
                   gets(my_state, [a(_), c(_)])).
 
-double_a(my_state(X, Y), my_state(X1, Y)) :-    
-    X1 is 2 * X.
 
 go -->
-    with_state(double_a),
+    mod_state double_a,
     put(my_state, b, 3).
 
 test('call goal with_state', [State == my_state(2, 3)]) :-
