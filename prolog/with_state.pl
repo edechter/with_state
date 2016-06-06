@@ -7,8 +7,10 @@
                        state//2,  %% //2: ?StateIn, ?StateOut
                        
                        run_state/3, %% +StateIn, -StateOut, +Goal
-                       with_state//1, %% +Goal
-
+                       
+                       mod_state//1, %% +Goal
+                       op(950, fx, mod_state),
+                       
                        gets//2,  %% +Constructor, +FieldValues 
                        puts//2, %% +Constructor, +FieldValues 
                        
@@ -76,7 +78,8 @@ state(S0, S), [S] --> [S0].
 run_state(_, _, _) :-
     throw(error(existence_error(procedure, run_state/3), context(run_state/3, should_be_goal_expanded))).
 
-%!    with_state(+Constructor: atom, :Goal)//
+
+%!    mod_state(+Constructor: atom, :Goal)//
 %
 % Call =Goal= to modify state. Goal must have type =| State --> State
 % |= . Equivalent to
@@ -86,12 +89,24 @@ run_state(_, _, _) :-
 %  { call(Goal, State0, State) }
 % ==
 %
-% NB: with_state is subject to goal expansion.
+% NB: mod_state is subject to goal expansion.
 %
-with_state(_, _, _) :-
-    throw(error(existence_error(procedure, with_state/3), context(with_state/3, should_be_goal_expanded))).
+mod_state(_, _, _) :-
+    throw(error(existence_error(procedure, 'mod_state/3'), context('mod_state/3', should_be_goal_expanded))).
 
-expand(with_state(Goal, [StateIn|X], [StateOut|X]), call(Goal, StateIn, StateOut)).
+
+expand(mod_state(Goal, In, Out), (In-Out=[StateIn|X]-[StateOut|X], Goal1)):-
+
+    strip_module(Goal, Mod, Plain),
+    (atom(Plain) ->
+         Args = [],
+         Name = Plain
+     ;     
+     compound_name_arguments(Plain, Name, Args)
+    ),
+    append(Args, [StateIn, StateOut], Args1),         
+    Plain1 =.. [Name|Args1], 
+    Goal1 = (Mod:Plain1).
 
 
 
@@ -158,16 +173,16 @@ expand(run_state(StateIn, StateOut, Goal), Body) :-
 
 
 expand(gets(Constructor, Pairs, Head, Tail), (state(Rec, Head, Tail), Terms)) :-
-        prolog_load_context(module, M),
-        expand_gets(Pairs, M, Constructor, Rec, Terms).
+    prolog_load_context(module, M),
+    expand_gets(Pairs, M, Constructor, Rec, Terms).
 
 expand(puts(Constructor, Pairs, Head, Tail), (state(RecIn, RecOut, Head, Tail), Terms)) :-
         prolog_load_context(module, M),
         expand_puts(Pairs, M, Constructor, RecIn, RecOut, Terms).
 
 expand(get(Constructor, Field, Value, Head, Tail), Goal) :-
-        FieldValue =.. [Field, Value],
-        expand(gets(Constructor, [FieldValue], Head, Tail), Goal).
+    FieldValue =.. [Field, Value],
+    expand(gets(Constructor, [FieldValue], Head, Tail), Goal).
               
 expand(put(Constructor, Field, Value, Head, Tail), Goal) :-
         FieldValue =.. [Field, Value],
@@ -212,7 +227,9 @@ mk_put_term(Constructor, Field, Value, Term, RecIn, RecOut) :-
 	user:goal_expansion/2.
 
 user:goal_expansion(In, Out) :-
-        expand(In, Out).
+    expand(In, Out).
+    %% format('In: ~p --> ~n    Out: ~p~n', [In, Out]).
+    
 
 
           %%%%%%%
