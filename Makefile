@@ -8,3 +8,8 @@ test:
 
 check:
 
+install:
+
+clean:
+
+
