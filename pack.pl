@@ -6,7 +6,7 @@ name(with_state).
 
 title('Stateful computations with records').
 
-version('0.0.3').
+version('0.0.4').
 
 author('Eyal Dechter', 'eyaldechter@gmail.com').
 
