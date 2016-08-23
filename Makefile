@@ -1,4 +1,6 @@
 
+all:
+
 
 .PHONE: test
 test:
